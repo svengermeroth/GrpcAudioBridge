@@ -1,0 +1,6 @@
+/vcpkg_installed/
+/.vs/
+/x64/
+/GrpcAudioBridge/x64/
+*.user
+build_*.log

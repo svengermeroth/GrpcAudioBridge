@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package Whisper;
+
+service AudioStream {
+rpc StreamAudio (stream AudioChunk) returns (stream StreamingWordsResponse);
+}
+
+message AudioChunk {
+    bytes data = 1;
+}
+
+message StreamingWordsResponse {
+    string word = 1;
+    string start_time = 2;
+    string end_time = 3;
+}

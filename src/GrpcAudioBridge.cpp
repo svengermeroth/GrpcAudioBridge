@@ -64,9 +64,9 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
     session->log("Connecting to server " + serverAddress + "...");
 
     std::string target = serverAddress;
-    if (isHttps)
+    if (startsWithIgnoreCase(target, "https://"))
         target = target.substr(8);
-    else if (isHttp)
+    else if (startsWithIgnoreCase(target, "http://"))
         target = target.substr(7);
 
     std::shared_ptr<grpc::ChannelCredentials> credentials = isHttps

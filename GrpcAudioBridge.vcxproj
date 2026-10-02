@@ -87,6 +87,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\GrpcAudioBridge.h" />
+    <ResourceCompile Include="GrpcAudioBridge.rc" />
     <ClCompile Include="src\GrpcAudioBridge.cpp" />
     <ClCompile Include="Generated\whisper.pb.cc">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>

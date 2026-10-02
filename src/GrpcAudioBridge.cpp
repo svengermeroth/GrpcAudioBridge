@@ -7,8 +7,23 @@
 #include <mutex>
 #include <string>
 
+#include "ReceiveProgressCalculator.h"
+
 namespace
 {
+    // "[_PROGRESS|20|Detected 3 speech segments_]" -> "Detected 3 speech segments"
+    std::string extractProgressText(const std::string& word)
+    {
+        const size_t first = word.find('|');
+        const size_t second = first == std::string::npos ? std::string::npos : word.find('|', first + 1);
+        if (second == std::string::npos)
+            return {};
+        std::string text = word.substr(second + 1);
+        if (text.size() >= 2 && text.compare(text.size() - 2, 2, "_]") == 0)
+            text.resize(text.size() - 2);
+        return text;
+    }
+
     bool startsWithIgnoreCase(const std::string& value, const char* prefix)
     {
         const size_t prefixLen = strlen(prefix);
@@ -87,18 +102,29 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
 
     session->log(std::string("Sending audio file: ") + (audioFilePath != nullptr ? audioFilePath : ""));
 
+    ProgressCalculation::ReceiveProgressCalculator receiveProgressCalculator;
+    auto reportReceiveProgress = [session](int value)
+    {
+        if (value >= 0 && session->callbacks.onReceiveProgress)
+            session->callbacks.onReceiveProgress(session->callbacks.user, value);
+    };
+
     // Send phase: read the file in 4096-byte chunks and write each as an AudioChunk.
     {
-        std::ifstream file(audioFilePath, std::ios::binary);
+        std::ifstream file(audioFilePath, std::ios::binary | std::ios::ate);
         if (!file)
         {
             session->log("Error opening audio file for reading.");
         }
         else
         {
+            const int64_t fileSize = static_cast<int64_t>(file.tellg());
+            file.seekg(0, std::ios::beg);
+
             const std::streamsize bufferSize = 4096;
             std::string buffer(static_cast<size_t>(bufferSize), '\0');
             int64_t total = 0;
+            int sentProgress = 0;
             while (file.read(&buffer[0], bufferSize) || file.gcount() > 0)
             {
                 const std::streamsize bytesRead = file.gcount();
@@ -108,9 +134,23 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
                     break;
                 total += bytesRead;
                 session->log("Sent " + std::to_string(bytesRead) + " bytes (total " + std::to_string(total) + ")");
-                if (session->callbacks.onTransmit)
-                    session->callbacks.onTransmit(session->callbacks.user, static_cast<int64_t>(bytesRead), total);
+
+                if (fileSize > 0)
+                {
+                    auto fValue = 100.0 * static_cast<double>(total) / static_cast<double>(fileSize);
+                    const int value = static_cast<int>(std::min(fValue, 100.0));
+
+                    if (value > sentProgress)
+                    {
+                        if (session->callbacks.onTransmitProgress)
+                            session->callbacks.onTransmitProgress(session->callbacks.user, value);
+                        sentProgress = value;
+                    }
+                }
             }
+
+            if(sentProgress < 100 && session->callbacks.onTransmitProgress)
+                session->callbacks.onTransmitProgress(session->callbacks.user, 100);
 
             session->log("Finished sending audio file.");
         }
@@ -134,17 +174,20 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
         {
             if (word.find("PROGRESS") != std::string::npos)
             {
-                if (session->callbacks.onProgress)
-                    session->callbacks.onProgress(session->callbacks.user, std::strtoll(startTime.c_str(), nullptr, 10));
+                const int serverPercent = static_cast<int>(std::strtol(startTime.c_str(), nullptr, 10));
+                reportReceiveProgress(receiveProgressCalculator.onProgress(serverPercent, extractProgressText(word)));
             }
             else if (word.find("_BEG") != std::string::npos)
             {
                 if (session->callbacks.onStarted)
                     session->callbacks.onStarted(session->callbacks.user);
             }
-            else if (session->callbacks.onTranscriptionFinished)
+            else
             {
-                session->callbacks.onTranscriptionFinished(session->callbacks.user);
+                // if (word == "[_END_]") possible to end up here without end?
+                    reportReceiveProgress(receiveProgressCalculator.complete());
+                if (session->callbacks.onTranscriptionFinished)
+                    session->callbacks.onTranscriptionFinished(session->callbacks.user);
             }
         }
         else if (session->callbacks.onWord)

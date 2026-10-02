@@ -22,8 +22,8 @@ typedef void* GabSession;
 // Marshal to your own UI/main thread as needed before touching UI state.
 typedef void (*GabLogFn)(void* user, const char* message);
 typedef void (*GabWordFn)(void* user, const char* word, const char* startMs, const char* endMs);
-typedef void (*GabProgressFn)(void* user, int64_t progress);
-typedef void (*GabTransmitFn)(void* user, int64_t bytesRead, int64_t totalBytes);
+typedef void (*GabReceiveProgressFn)(void* user, int64_t progress);
+typedef void (*GabTransmitProgressFn)(void* user, int64_t progress);
 typedef void (*GabSimpleFn)(void* user);
 
 typedef struct GabCallbacks
@@ -31,8 +31,8 @@ typedef struct GabCallbacks
     void* user;
     GabLogFn onLog;             // optional, may be null
     GabWordFn onWord;           // required for meaningful output
-    GabProgressFn onProgress;   // optional
-    GabTransmitFn onTransmit;   // optional
+    GabReceiveProgressFn onReceiveProgress;
+    GabTransmitProgressFn onTransmitProgress;
     GabSimpleFn onStarted;              // optional: server signaled transcription start ("[..._BEG...]" marker)
     GabSimpleFn onTranscriptionFinished; // optional: server signaled transcription end mid-stream (e.g. "[..._END...]" marker)
     GabSimpleFn onFinished;             // required: Gab_StreamFile call itself has returned/the RPC closed

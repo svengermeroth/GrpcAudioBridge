@@ -86,7 +86,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ReceiveProgressCalculator.cpp" />
     <ClInclude Include="include\GrpcAudioBridge.h" />
+    <ClInclude Include="include\ReceiveProgressCalculator.h" />
     <ResourceCompile Include="GrpcAudioBridge.rc" />
     <ClCompile Include="src\GrpcAudioBridge.cpp" />
     <ClCompile Include="Generated\whisper.pb.cc">

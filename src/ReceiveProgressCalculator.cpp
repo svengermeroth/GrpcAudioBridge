@@ -35,6 +35,7 @@ namespace ProgressCalculation
         // Preparation phase only; unknown texts after it are ignored.
         if (m_total == 0)
             return advance(kPrepEnd * std::clamp(serverPercent, 0, 20) / 20.0);
+
         return -1;
     }
 

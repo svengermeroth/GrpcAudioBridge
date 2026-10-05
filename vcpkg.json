@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": [
     "grpc",
+    "gtest",
     "protobuf"
   ],
   "builtin-baseline": "ca519a073d26c1d3919ef1e7ba1bc9ca438c8eff"

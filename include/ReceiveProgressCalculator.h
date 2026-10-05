@@ -27,5 +27,7 @@ namespace ProgressCalculation
 
         int m_total = 0;
         int m_current = 0;
+
+        friend class ReceiveProgressCalculatorTest;
     };
 } // namespace ProgressCalculation

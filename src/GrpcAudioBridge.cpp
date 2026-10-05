@@ -8,22 +8,10 @@
 #include <string>
 
 #include "ReceiveProgressCalculator.h"
+#include "ExtractProgressText.h"
 
 namespace
 {
-    // "[_PROGRESS|20|Detected 3 speech segments_]" -> "Detected 3 speech segments"
-    std::string extractProgressText(const std::string& word)
-    {
-        const size_t first = word.find('|');
-        const size_t second = first == std::string::npos ? std::string::npos : word.find('|', first + 1);
-        if (second == std::string::npos)
-            return {};
-        std::string text = word.substr(second + 1);
-        if (text.size() >= 2 && text.compare(text.size() - 2, 2, "_]") == 0)
-            text.resize(text.size() - 2);
-        return text;
-    }
-
     bool startsWithIgnoreCase(const std::string& value, const char* prefix)
     {
         const size_t prefixLen = strlen(prefix);
@@ -105,7 +93,11 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
     ProgressCalculation::ReceiveProgressCalculator receiveProgressCalculator;
     auto reportReceiveProgress = [session](int value)
     {
-        if (value >= 0 && session->callbacks.onReceiveProgress)
+        auto isValidProgress = value >= 0;
+        if (not isValidProgress)
+            return;
+
+        if (session->callbacks.onReceiveProgress)
             session->callbacks.onReceiveProgress(session->callbacks.user, value);
     };
 
@@ -175,7 +167,7 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
             if (word.find("PROGRESS") != std::string::npos)
             {
                 const int serverPercent = static_cast<int>(std::strtol(startTime.c_str(), nullptr, 10));
-                reportReceiveProgress(receiveProgressCalculator.onProgress(serverPercent, extractProgressText(word)));
+                reportReceiveProgress(receiveProgressCalculator.onProgress(serverPercent, ProgressCalculation::extractProgressText(word)));
             }
             else if (word.find("_BEG") != std::string::npos)
             {

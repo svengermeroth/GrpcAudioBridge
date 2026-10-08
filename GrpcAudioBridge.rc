@@ -3,8 +3,8 @@
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION    1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION    1,0,0,1
+ PRODUCTVERSION 1,0,0,1
  FILETYPE       VFT_DLL
 BEGIN
     BLOCK "StringFileInfo"
@@ -12,9 +12,9 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "GrpcAudioBridge"
-            VALUE "FileVersion",     "1.0.0.0"
+            VALUE "FileVersion",     "1.0.0.1"
             VALUE "ProductName",     "Samplitude/Sequoia"
-            VALUE "ProductVersion",  "1.0.0.0"
+            VALUE "ProductVersion",  "1.0.0.1"
         END
     END
     BLOCK "VarFileInfo"

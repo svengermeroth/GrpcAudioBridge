@@ -33,7 +33,8 @@ typedef struct GabCallbacks
     GabWordFn onWord;           // required for meaningful output
     GabReceiveProgressFn onReceiveProgress;
     GabTransmitProgressFn onTransmitProgress;
-    GabSimpleFn onStarted;              // optional: server signaled transcription start ("[..._BEG...]" marker)
+    GabSimpleFn onStarted;              // streamfile is started and cancelable
+    GabSimpleFn onTranscriptionStarted; // optional: server signaled transcription end mid-stream (e.g. "[..._END...]" marker)
     GabSimpleFn onTranscriptionFinished; // optional: server signaled transcription end mid-stream (e.g. "[..._END...]" marker)
     GabSimpleFn onFinished;             // required: Gab_StreamFile call itself has returned/the RPC closed
 } GabCallbacks;

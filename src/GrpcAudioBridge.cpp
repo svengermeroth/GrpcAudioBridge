@@ -85,8 +85,7 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
         session->context = &context;
     }
 
-    std::unique_ptr<grpc::ClientReaderWriter<Whisper::AudioChunk, Whisper::StreamingWordsResponse>> stream(
-        client->StreamAudio(&context));
+    std::unique_ptr<grpc::ClientReaderWriter<Whisper::AudioChunk, Whisper::StreamingWordsResponse>> stream(client->StreamAudio(&context));
 
     session->log(std::string("Sending audio file: ") + (audioFilePath != nullptr ? audioFilePath : ""));
 
@@ -100,6 +99,9 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
         if (session->callbacks.onReceiveProgress)
             session->callbacks.onReceiveProgress(session->callbacks.user, value);
     };
+
+    if (session->callbacks.onStarted)
+        session->callbacks.onStarted(session->callbacks.user);
 
     // Send phase: read the file in 4096-byte chunks and write each as an AudioChunk.
     {
@@ -171,8 +173,8 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
             }
             else if (word.find("_BEG") != std::string::npos)
             {
-                if (session->callbacks.onStarted)
-                    session->callbacks.onStarted(session->callbacks.user);
+                if (session->callbacks.onTranscriptionStarted)
+                    session->callbacks.onTranscriptionStarted(session->callbacks.user);
             }
             else
             {

@@ -57,7 +57,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\include;$(MSBuildProjectDirectory)\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\interface;$(MSBuildProjectDirectory)\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32_LEAN_AND_MEAN;GRPCAUDIOBRIDGE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -75,7 +75,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\include;$(MSBuildProjectDirectory)\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\interface;$(MSBuildProjectDirectory)\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32_LEAN_AND_MEAN;GRPCAUDIOBRIDGE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -86,13 +86,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\ExtractProgressText.cpp" />
-    <ClCompile Include="src\ReceiveProgressCalculator.cpp" />
-    <ClInclude Include="include\GrpcAudioBridge.h" />
-    <ClInclude Include="include\ReceiveProgressCalculator.h" />
-    <ClInclude Include="src\ExtractProgressText.h" />
+    <ClCompile Include="source\ExtractProgressText.cpp" />
+    <ClCompile Include="source\ReceiveProgressCalculator.cpp" />
+    <ClInclude Include="interface\GrpcAudioBridge.h" />
+    <ClInclude Include="source\ReceiveProgressCalculator.h" />
+    <ClInclude Include="source\ExtractProgressText.h" />
     <ResourceCompile Include="GrpcAudioBridge.rc" />
-    <ClCompile Include="src\GrpcAudioBridge.cpp" />
+    <ClCompile Include="source\GrpcAudioBridge.cpp" />
     <ClCompile Include="Generated\whisper.pb.cc">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>

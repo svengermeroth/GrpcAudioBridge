@@ -6,3 +6,4 @@
 build_*.log
 /Tests/x64/
 /Tests/GrpcAudi*
+*.aps

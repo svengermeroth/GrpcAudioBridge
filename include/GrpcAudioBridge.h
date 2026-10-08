@@ -21,7 +21,7 @@ typedef void* GabSession;
 // All callbacks fire on the bridge's internal worker thread, not the caller's thread.
 // Marshal to your own UI/main thread as needed before touching UI state.
 typedef void (*GabLogFn)(void* user, const char* message);
-typedef void (*GabWordFn)(void* user, const char* word, const char* startMs, const char* endMs);
+typedef void (*GabWordFn)(void* user, const char* word, const char* fSecondsStart, const char* fSecondsEnd);
 typedef void (*GabReceiveProgressFn)(void* user, int64_t progress);
 typedef void (*GabTransmitProgressFn)(void* user, int64_t progress);
 typedef void (*GabSimpleFn)(void* user);

@@ -157,16 +157,16 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
     while (stream->Read(&response))
     {
         const std::string& word = response.word();
-        const std::string& startTime = response.start_time();
-        const std::string& endTime = response.end_time();
+        const std::string& fSecondsStartTime = response.start_time();
+        const std::string& fSecondsEndTime = response.end_time();
 
-        session->log("Word: " + word + ", Start: " + startTime + ", End: " + endTime);
+        session->log("Word: " + word + ", Start: " + fSecondsStartTime + ", End: " + fSecondsEndTime);
 
         if (word.find('[') != std::string::npos && word.find(']') != std::string::npos)
         {
             if (word.find("PROGRESS") != std::string::npos)
             {
-                const int serverPercent = static_cast<int>(std::strtol(startTime.c_str(), nullptr, 10));
+                const int serverPercent = static_cast<int>(std::strtol(fSecondsStartTime.c_str(), nullptr, 10));
                 reportReceiveProgress(receiveProgressCalculator.onProgress(serverPercent, ProgressCalculation::extractProgressText(word)));
             }
             else if (word.find("_BEG") != std::string::npos)
@@ -184,7 +184,7 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
         }
         else if (session->callbacks.onWord)
         {
-            session->callbacks.onWord(session->callbacks.user, word.c_str(), startTime.c_str(), endTime.c_str());
+            session->callbacks.onWord(session->callbacks.user, word.c_str(), fSecondsStartTime.c_str(), fSecondsEndTime.c_str());
         }
     }
 

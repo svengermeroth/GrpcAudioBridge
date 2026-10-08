@@ -4,3 +4,5 @@
 /GrpcAudioBridge/x64/
 *.user
 build_*.log
+/Tests/x64/
+/Tests/GrpcAudi*

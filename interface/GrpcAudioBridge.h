@@ -48,8 +48,10 @@ GAB_API GabSession Gab_Create(const char* serverAddress, const GabCallbacks* cal
 // or Gab_Cancel is called. Call this from your own worker thread, not the UI thread.
 GAB_API void Gab_StreamFile(GabSession session, const char* audioFilePath);
 
-// Thread-safe. Requests cancellation of an in-progress Gab_StreamFile call.
-GAB_API void Gab_Cancel(GabSession session);
+// Thread-safe. Requests cancellation of an in-progress Gab_StreamFile call for audioFilePath.
+// Does nothing if no stream is running or the running stream belongs to another file, so a cancel
+// that arrives after the stream of audioFilePath has finished can't hit the next Gab_StreamFile call.
+GAB_API void Gab_Cancel(GabSession session, const char* audioFilePath);
 
 GAB_API void Gab_Destroy(GabSession session);
 

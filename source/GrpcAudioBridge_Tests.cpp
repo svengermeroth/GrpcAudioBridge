@@ -368,7 +368,7 @@ namespace
         std::thread worker([&] { Gab_StreamFile(session, audioPath().c_str()); });
 
         const bool started = transcriptionStarted.get_future().wait_for(kTimeout) == std::future_status::ready;
-        Gab_Cancel(session);
+        Gab_Cancel(session, audioPath().c_str());
         worker.join();
         const auto elapsed = std::chrono::steady_clock::now() - begin;
         Gab_Destroy(session);
@@ -392,7 +392,7 @@ namespace
         // onStarted documents that the stream is cancelable from that point on.
         useRegularTranscript();
         GabSession session = nullptr;
-        m_recorder.onStartedHook = [&] { Gab_Cancel(session); };
+        m_recorder.onStartedHook = [&] { Gab_Cancel(session, audioPath().c_str()); };
         const GabCallbacks callbacks = m_recorder.callbacks();
         session = Gab_Create(address().c_str(), &callbacks);
 
@@ -420,9 +420,27 @@ namespace
         const GabCallbacks callbacks = m_recorder.callbacks();
         GabSession session = Gab_Create(address().c_str(), &callbacks);
 
-        Gab_Cancel(session);
+        Gab_Cancel(session, audioPath().c_str());
         Gab_StreamFile(session, audioPath().c_str());
-        Gab_Cancel(session);
+        Gab_Cancel(session, audioPath().c_str());
+        Gab_Destroy(session);
+
+        EXPECT_EQ(regularTranscriptEvents(), m_recorder.snapshot());
+    }
+
+    TEST_F(GrpcAudioBridgeTest, Cancel_OtherFileIsNoOp)
+    {
+        // a late cancel for a previous file must not hit the stream of the current file
+        useRegularTranscript();
+        GabSession session = nullptr;
+        m_recorder.onStartedHook = [&] {
+            Gab_Cancel(session, "C:\\other.wav");
+            Gab_Cancel(session, nullptr);
+        };
+        const GabCallbacks callbacks = m_recorder.callbacks();
+        session = Gab_Create(address().c_str(), &callbacks);
+
+        Gab_StreamFile(session, audioPath().c_str());
         Gab_Destroy(session);
 
         EXPECT_EQ(regularTranscriptEvents(), m_recorder.snapshot());
@@ -430,7 +448,7 @@ namespace
 
     TEST_F(GrpcAudioBridgeTest, Cancel_NullSessionIsNoOp)
     {
-        Gab_Cancel(nullptr);
+        Gab_Cancel(nullptr, audioPath().c_str());
         Gab_StreamFile(nullptr, audioPath().c_str());
         Gab_Destroy(nullptr);
     }

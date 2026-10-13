@@ -33,6 +33,7 @@ struct GabSessionImpl
 
     std::mutex contextMutex;
     grpc::ClientContext* context = nullptr;
+    std::string contextFilePath; // file of the running stream, protected by contextMutex
 
     void log(const std::string& message) const
     {
@@ -83,6 +84,7 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
     {
         std::lock_guard<std::mutex> lock(session->contextMutex);
         session->context = &context;
+        session->contextFilePath = audioFilePath != nullptr ? audioFilePath : "";
     }
 
     std::unique_ptr<grpc::ClientReaderWriter<Whisper::AudioChunk, Whisper::StreamingWordsResponse>> stream(client->StreamAudio(&context));
@@ -197,6 +199,7 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
     {
         std::lock_guard<std::mutex> lock(session->contextMutex);
         session->context = nullptr;
+        session->contextFilePath.clear();
     }
 
     session->log("Disconnected");
@@ -204,14 +207,15 @@ GAB_API void Gab_StreamFile(GabSession sessionHandle, const char* audioFilePath)
         session->callbacks.onFinished(session->callbacks.user);
 }
 
-GAB_API void Gab_Cancel(GabSession sessionHandle)
+GAB_API void Gab_Cancel(GabSession sessionHandle, const char* audioFilePath)
 {
     auto* session = static_cast<GabSessionImpl*>(sessionHandle);
-    if (session == nullptr)
+    if (session == nullptr || audioFilePath == nullptr)
         return;
 
+    // same lock in which Gab_StreamFile sets / resets the context -> only the stream of audioFilePath gets canceled
     std::lock_guard<std::mutex> lock(session->contextMutex);
-    if (session->context != nullptr)
+    if (session->context != nullptr && session->contextFilePath == audioFilePath)
         session->context->TryCancel();
 }
 

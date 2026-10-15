@@ -18,7 +18,7 @@ extern "C" {
 
 typedef void* GabSession;
 
-// All callbacks fire on the bridge's internal worker thread, not the caller's thread.
+// All callbacks fire synchronously on the thread that calls Gab_StreamFile - never after it has returned.
 // Marshal to your own UI/main thread as needed before touching UI state.
 typedef void (*GabLogFn)(void* user, const char* message);
 typedef void (*GabWordFn)(void* user, const char* word, const char* fSecondsStart, const char* fSecondsEnd);
@@ -36,7 +36,7 @@ typedef struct GabCallbacks
     GabSimpleFn onStarted;              // streamfile is started and cancelable
     GabSimpleFn onTranscriptionStarted; // optional: server signaled transcription start ("[..._BEG...]" marker)
     GabSimpleFn onTranscriptionFinished; // optional: server signaled transcription end mid-stream (e.g. "[..._END...]" marker)
-    GabSimpleFn onFinished;             // required: Gab_StreamFile call itself has returned/the RPC closed
+    GabSimpleFn onFinished;             // required: the RPC closed - last callback before Gab_StreamFile returns
 } GabCallbacks;
 
 // serverAddress: "host:port", optionally prefixed with "http://" or "https://".

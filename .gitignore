@@ -5,5 +5,5 @@
 *.user
 build_*.log
 /Tests/x64/
-/Tests/GrpcAudi*
+/Tests/GrpcAudi.*
 *.aps

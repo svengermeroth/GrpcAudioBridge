@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{481BE8C6-E3B6-4E1C-891F-8590C321F9A8}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <!-- Shares the solution's vcpkg.json and vcpkg_installed folder with GrpcAudioBridge.vcxproj,
+       so both projects install the identical package set (gtest included). -->
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>true</VcpkgEnabled>
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\</VcpkgManifestRoot>
+    <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static-md</VcpkgTriplet>
+    <VcpkgAdditionalInstallOptions>--x-buildtrees-root=C:\gab_vb --x-packages-root=C:\gab_vp</VcpkgAdditionalInstallOptions>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\source;$(MSBuildThisFileDirectory)..\interface;$(MSBuildThisFileDirectory)..\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <!-- GrpcAudioBridge.cpp is compiled into the test executable; GRPCAUDIOBRIDGE_EXPORTS keeps GAB_API from being dllimport. -->
+      <PreprocessorDefinitions>NOMINMAX;WIN32_LEAN_AND_MEAN;GRPCAUDIOBRIDGE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- vcpkg keeps gtest_main in manual-link, so it is not auto-linked. -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(VcpkgManifestRoot)vcpkg_installed\$(VcpkgTriplet)\$(VcpkgTriplet)\debug\lib\manual-link\gtest_main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(VcpkgManifestRoot)vcpkg_installed\$(VcpkgTriplet)\$(VcpkgTriplet)\lib\manual-link\gtest_main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <!-- Code under test is compiled directly into the test executable; the DLL does not export it. -->
+    <ClCompile Include="..\source\ExtractProgressText.cpp" />
+    <ClCompile Include="..\source\ExtractProgressText_Tests.cpp" />
+    <ClCompile Include="..\source\ReceiveProgressCalculator.cpp" />
+    <ClInclude Include="..\source\ReceiveProgressCalculator.h" />
+    <!-- Tests live next to the code they test. gtest_main (via vcpkg) provides main(). -->
+    <ClCompile Include="..\source\ReceiveProgressCalculator_Tests.cpp" />
+    <ClInclude Include="..\source\ExtractProgressText.h" />
+    <ClInclude Include="..\source\ExtractProgressText_TestData.h" />
+    <!-- Acceptance tests: public C API against an in-process fake gRPC server. -->
+    <ClCompile Include="..\source\GrpcAudioBridge.cpp" />
+    <ClCompile Include="..\source\GrpcAudioBridge_Tests.cpp" />
+    <ClInclude Include="..\interface\GrpcAudioBridge.h" />
+    <ClCompile Include="..\Generated\whisper.pb.cc">
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="..\Generated\whisper.grpc.pb.cc">
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
